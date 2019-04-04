@@ -1,0 +1,138 @@
+---
+title: "ReadMe"
+author: "Coleen Smith"
+date: "4/2/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+## packages needed
+library(R.utils)
+```
+
+## Assignment
+
+* This assignment will create one R script called run_analysis.R that does the following.
+    1. Merges the training and the test sets to create one data set.
+    2. Extracts only the measurements on the mean and standard deviation for each measurement.
+    3. Uses descriptive activity names to name the activities in the data set
+    4. Appropriately labels the data set with descriptive variable names.
+    5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.  
+
+## Raw Data
+Data collected from the accelerometers from the Samsung Galaxy S smartphone was made available to download. A full description is available at the site where the data was obtained:
+
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+
+Here are the data for the project:
+
+https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+
+### UCI HAR Dataset
+
+After downloading and unzipping files, I renamed the directory from "UCI HAR Dataset" to "UCI_HAR_Dataset" to avoid possible issues with spaces in a pathname. 
+
+
+```{r Dataset}
+    dir("UCI_HAR_Dataset")
+```
+activity_labels.txt - six activities, two columns (number & name), all uppercase, no headers  
+features.txt - 561 variables, two columns (number & name), mixed case, no headers  
+46 occurrences of "mean"  
+10 occurrences of "Mean", all as part of an ordered pair, rows 555-561  
+33 occurrences of "std", only single occurrence/row  
+features_info.txt - detailed information on 30 variables and calculations listed in features.txt.    
+README.txt - summary of project.  
+test (folder) - data from first 30 subjects  
+train (folder)- data from remaining 70 subjects
+
+Based on the information included in features_info.txt, the files in the test and train and train folders are formatted and organized the same way. Since the test folder files are smaller with data from just 30 subjects, they became the starting point to understand the data and prepare the files for merging. To get a sense of how the data were arranged, I looked at each of the test files using atom.
+
+### Test Folder
+```{r test}
+    dir("UCI_HAR_Dataset/test")
+```
+test(folder):  
+    inertial signals (folder):   
+        each .txt - a set of 35 element vectors.  
+    subject_test.txt - a single column of numbers,no column headers.
+    x_test.txt - rows of 561 element vectors, no column headers.  
+    y_test.txt - a single column of numbers, no column headers. 
+        1 - 496 occurrences  
+        2 - 471 occurrences  
+        3 - 420 occurrences   
+        4 - 491 occurrences   
+        5 - 532 occurrences  
+        6 - 537 occurrences  
+        Total = 2947  
+    
+### Train Folder
+```{r train}
+    dir("UCI_HAR_Dataset/train")
+```
+train (folder) mirrors file structure and organization seen in test files, only larger because files represent 70 subjects rather than 30.
+
+### Determine how to merge subject_test, x_test, and y_test data
+
+From a bookkeeping perspective, a good place to start is with the number lines per file. The number of data lines in the source file should equal the number of lines in the destination file. [Back in the dark ages when file transfer protocol included a magnetic tape and FedEx Overnight, I spent a day looking for 13 "lost" lines out of 25,000 - lesson burned.]  
+
+```{r count lines, echo=FALSE}
+    ## library(R.utils)
+    countLines("UCI_HAR_Dataset/features.txt")
+    countLines("UCI_HAR_Dataset/test/subject_test.txt")
+    countLines("UCI_HAR_Dataset/test/X_test.txt")
+    countLines("UCI_HAR_Dataset/test/Y_test.txt")
+```
+
+According to README.txt and features_info.txt, features.txt would be the names of the 561 variables recorded. Since the 561 variable list described, contains the summary data (mean & std) required to comoplete the assignment, the merge will not use the detailed observations contained in the inertial signals folders. Each file (subject_test.txt, X_test.txt and Y_test.txt) all have 2947 rows, thus use cbind() to merge the test data files. 
+
+Using read.table, creates a data frame from each file: subject_test.txt, X_test.txt and Y_test.txt.
+
+``` {r read files}
+    subject_test <- read.table("UCI_HAR_Dataset/test/subject_test.txt", header = FALSE)
+    str(subject_test)
+    X_test <- read.table("UCI_HAR_Dataset/test/X_test.txt", header = FALSE)
+    ## This is a looooong output, just need highlights
+    str(X_test, list.len = 5)
+    Y_test <- read.table("UCI_HAR_Dataset/test/Y_test.txt", header = FALSE)
+    str(Y_test)
+```
+
+Thinking ahead to tidy data (from lectures, etc):  
+1. Each variable forms a column.  
+- Each dataframe's columns represent a single variable:  
+subject_test: 1 subject   
+Y_test: 1 activity  
+X_test: 561 activity features.  
+2. Each observation forms a row. 
+- An observation is of a given subject, performing a specific activity with related features  
+3. Each type of observational unit forms a table.  
+- Observational unit is test group  
+
+## Merge the training and the test sets to create one data set
+
+Based on this assignment's requirements, I decided to follow Wickham approach to tidying data when there is one type of data in multiple tables (Ref: Wickham, Section 3.5)  
+1. Read the files into a list of tables.  
+2. For each table, add a new column that records the original file name.  
+3. Combine all tables into a single table.    
+
+Load the dplyr package.
+
+## Resources
+ 
+The following Resources were very helpful in strategizing and working with the datasets:
+## Packages
+
+R.utils  
+dplyr  
+
+
+### Tidy Data
+
+David Hood's "thoughtfulbloke" blog at https://thoughtfulbloke.wordpress.com/2015/09/09/getting-and-cleaning-the-assignment/  (04/02/2019)
+Hadley Wickham's "Tidy Data" paper at https://vita.had.co.nz/papers/tidy-data.pdf  (04/03/2019)  
+Hadley Wickam & Garrett Grolemund, R for Data Science
+
+### General R
+R Markdown Cheatsheet at https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf  
