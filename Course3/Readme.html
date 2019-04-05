@@ -198,16 +198,7 @@ $(document).ready(function () {
 
 <div id="assignment" class="section level2">
 <h2>Assignment</h2>
-<ul>
-<li>This assignment will create one R script called run_analysis.R that does the following.
-<ol style="list-style-type: decimal">
-<li>Merges the training and the test sets to create one data set.</li>
-<li>Extracts only the measurements on the mean and standard deviation for each measurement.</li>
-<li>Uses descriptive activity names to name the activities in the data set</li>
-<li>Appropriately labels the data set with descriptive variable names.</li>
-<li>From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.</li>
-</ol></li>
-</ul>
+<p>This assignment will create one R script called run_analysis.R that does the following. 1. Merges the training and the test sets to create one data set. 2. Extracts only the measurements on the mean and standard deviation for each measurement. 3. Uses descriptive activity names to name the activities in the data set. 4. Appropriately labels the data set with descriptive variable names. 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.</p>
 </div>
 <div id="raw-data" class="section level2">
 <h2>Raw Data</h2>
@@ -223,14 +214,14 @@ $(document).ready(function () {
 ## [4] &quot;README.txt&quot;          &quot;test&quot;                &quot;train&quot;</code></pre>
 <p>activity_labels.txt - six activities, two columns (number &amp; name), all uppercase, no headers<br />
 features.txt - 561 variables, two columns (number &amp; name), mixed case, no headers<br />
-46 occurrences of “mean”<br />
-10 occurrences of “Mean”, all as part of an ordered pair, rows 555-561<br />
-33 occurrences of “std”, only single occurrence/row<br />
+- 46 occurrences of “mean”<br />
+- 10 occurrences of “Mean”, all as part of an ordered pair, rows 555-561<br />
+- 33 occurrences of “std”, only single occurrence/row<br />
 features_info.txt - detailed information on 30 variables and calculations listed in features.txt.<br />
 README.txt - summary of project.<br />
 test (folder) - data from first 30 subjects<br />
 train (folder)- data from remaining 70 subjects</p>
-<p>Based on the information included in features_info.txt, the files in the test and train and train folders are formatted and organized the same way. Since the test folder files are smaller with data from just 30 subjects, they became the starting point to understand the data and prepare the files for merging. To get a sense of how the data were arranged, I looked at each of the test files using atom.</p>
+<p>Based on the information included in features_info.txt, the files in the test and train and train folders are formatted and organized the same way. Since the test folder files are smaller with data from just 30 subjects, they became the starting point to understand the data and prepare the files for merging. To get a sense of how the data were arranged, I looked at each of the files using atom.</p>
 </div>
 <div id="test-folder" class="section level3">
 <h3>Test Folder</h3>
@@ -248,16 +239,17 @@ y_test.txt - a single column of numbers, no column headers. 1 - 496 occurrences<
 5 - 532 occurrences<br />
 6 - 537 occurrences<br />
 Total = 2947</p>
+<p>Used atom to look at the files in test.</p>
 </div>
 <div id="train-folder" class="section level3">
 <h3>Train Folder</h3>
 <pre class="r"><code>    dir(&quot;UCI_HAR_Dataset/train&quot;)</code></pre>
 <pre><code>## [1] &quot;Inertial Signals&quot;  &quot;subject_train.txt&quot; &quot;X_train.txt&quot;      
 ## [4] &quot;y_train.txt&quot;</code></pre>
-<p>train (folder) mirrors file structure and organization seen in test files, only larger because files represent 70 subjects rather than 30.</p>
+<p>Train (folder) mirrors file structure and organization seen in test files, only larger because files represent 70 subjects rather than 30.</p>
 </div>
-<div id="determine-how-to-merge-subject_test-x_test-and-y_test-data" class="section level3">
-<h3>Determine how to merge subject_test, x_test, and y_test data</h3>
+<div id="merge-test-files-subject_test-x_test-and-y_test-data" class="section level3">
+<h3>Merge test files: subject_test, X_test, and Y_test data</h3>
 <p>From a bookkeeping perspective, a good place to start is with the number lines per file. The number of data lines in the source file should equal the number of lines in the destination file. [Back in the dark ages when file transfer protocol included a magnetic tape and FedEx Overnight, I spent a day looking for 13 “lost” lines out of 25,000 - lesson burned.]</p>
 <pre><code>## [1] 561
 ## attr(,&quot;lastLineHasNewline&quot;)
@@ -271,8 +263,8 @@ Total = 2947</p>
 <pre><code>## [1] 2947
 ## attr(,&quot;lastLineHasNewline&quot;)
 ## [1] TRUE</code></pre>
-<p>According to README.txt and features_info.txt, features.txt would be the names of the 561 variables recorded. Since the 561 variable list described, contains the summary data (mean &amp; std) required to comoplete the assignment, the merge will not use the detailed observations contained in the inertial signals folders. Each file (subject_test.txt, X_test.txt and Y_test.txt) all have 2947 rows, thus use cbind() to merge the test data files.</p>
-<p>Using read.table, creates a data frame from each file: subject_test.txt, X_test.txt and Y_test.txt.</p>
+<p>According to README.txt and features_info.txt, features.txt would be the names of the 561 variables recorded. Since the 561 variable list described, contains the summary data (mean &amp; std) required to comoplete the assignment, the merge for this assignment will not use the detailed observations contained in the inertial signals folders.</p>
+<p>Using read.table, create a data frame from each file: subject_test.txt, X_test.txt and Y_test.txt. Create a character vector to use later in naming the Y_test data frame.</p>
 <pre class="r"><code>    subject_test &lt;- read.table(&quot;UCI_HAR_Dataset/test/subject_test.txt&quot;, header = FALSE)
     str(subject_test)</code></pre>
 <pre><code>## 'data.frame':    2947 obs. of  1 variable:
@@ -291,15 +283,27 @@ Total = 2947</p>
     str(Y_test)</code></pre>
 <pre><code>## 'data.frame':    2947 obs. of  1 variable:
 ##  $ V1: int  5 5 5 5 5 5 5 5 5 5 ...</code></pre>
-<p>Thinking ahead to tidy data (from lectures, etc):<br />
-1. Each variable forms a column.<br />
-- Each dataframe’s columns represent a single variable:<br />
-subject_test: 1 subject<br />
-Y_test: 1 activity<br />
-X_test: 561 activity features.<br />
-2. Each observation forms a row. - An observation is of a given subject, performing a specific activity with related features<br />
-3. Each type of observational unit forms a table.<br />
-- Observational unit is test group</p>
+<pre class="r"><code>    features &lt;- readLines(&quot;UCI_HAR_Dataset/features.txt&quot;)
+    str(features)</code></pre>
+<pre><code>##  chr [1:561] &quot;1 tBodyAcc-mean()-X&quot; &quot;2 tBodyAcc-mean()-Y&quot; ...</code></pre>
+<p>For readibility, set column names, use conventions described in README.txt and features_info.txt files.</p>
+<pre class="r"><code>    names(subject_test) &lt;- &quot;subject&quot;
+    names(Y_test) &lt;- &quot;activity&quot;
+    names(X_test) &lt;- features</code></pre>
+<p>Each file (subject_test.txt, X_test.txt and Y_test.txt) has 2947 rows, and represent different facets of a single observation, use cbind() to merge the test data files.</p>
+</div>
+<div id="merge-train-files-subject_train-x_train-and-y_train-data" class="section level3">
+<h3>Merge train files: subject_train, X_train, and Y_train data</h3>
+<p>As mentioned before the test and train files have identical structure and organization. Although larger, they can be processed in the same way as the test files: count lines, then create a data frame for each.</p>
+<pre><code>## [1] 7352
+## attr(,&quot;lastLineHasNewline&quot;)
+## [1] TRUE</code></pre>
+<pre><code>## [1] 7352
+## attr(,&quot;lastLineHasNewline&quot;)
+## [1] TRUE</code></pre>
+<pre><code>## [1] 7352
+## attr(,&quot;lastLineHasNewline&quot;)
+## [1] TRUE</code></pre>
 </div>
 </div>
 <div id="merge-the-training-and-the-test-sets-to-create-one-data-set" class="section level2">
@@ -309,6 +313,15 @@ X_test: 561 activity features.<br />
 2. For each table, add a new column that records the original file name.<br />
 3. Combine all tables into a single table.</p>
 <p>Load the dplyr package.</p>
+<p>Thinking ahead to tidy data (from lectures, etc):<br />
+1. Each variable forms a column.<br />
+- Each dataframe’s columns represent a single variable:<br />
+subject_test: 1 subject<br />
+Y_test: 1 activity<br />
+X_test: 561 activity features.<br />
+2. Each observation forms a row. - An observation is of a given subject, performing a specific activity with related features<br />
+3. Each type of observational unit forms a table.<br />
+- Observational unit is test group</p>
 </div>
 <div id="resources" class="section level2">
 <h2>Resources</h2>
@@ -320,8 +333,8 @@ dplyr</p>
 <p>David Hood’s “thoughtfulbloke” blog at <a href="https://thoughtfulbloke.wordpress.com/2015/09/09/getting-and-cleaning-the-assignment/" class="uri">https://thoughtfulbloke.wordpress.com/2015/09/09/getting-and-cleaning-the-assignment/</a> (04/02/2019) Hadley Wickham’s “Tidy Data” paper at <a href="https://vita.had.co.nz/papers/tidy-data.pdf" class="uri">https://vita.had.co.nz/papers/tidy-data.pdf</a> (04/03/2019)<br />
 Hadley Wickam &amp; Garrett Grolemund, R for Data Science</p>
 </div>
-<div id="general-r6" class="section level3">
-<h3>General R6</h3>
+<div id="general-r" class="section level3">
+<h3>General R</h3>
 <p>R Markdown Cheatsheet at <a href="https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf" class="uri">https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf</a></p>
 </div>
 </div>
