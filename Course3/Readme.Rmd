@@ -4,7 +4,6 @@ author: "Coleen Smith"
 date: "4/2/2019"
 output:
   pdf_document: default
-  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -41,15 +40,17 @@ After downloading and unzipping files, I renamed the directory from "UCI HAR Dat
     dir("UCI_HAR_Dataset")
 ```
 
-activity_labels.txt - six activities, two columns (number & name), all uppercase, no headers  
-features.txt - 561 variables, two columns (number & name), mixed case, no headers  
+### Parent Directory
+
+- activity_labels.txt - six activities, two columns (number & name), all uppercase, no headers  
+- features.txt - 561 variables, two columns (number & name), mixed case, no headers  
     - 46 occurrences of "mean"  
     - 10 occurrences of "Mean", all as part of an ordered pair, in 7 rows (555-561)  
     - 33 occurrences of "std", only single occurrence/row  
-features_info.txt - information on the variables and calculations listed in features.txt.  
-README.txt - overview of project  
-test (folder) - data from first 30 subjects  
-train (folder)- data from remaining 70 subjects
+- features_info.txt - information on the variables and calculations listed in features.txt  
+- README.txt - overview of project  
+- test (folder) - data from first 30 subjects  
+- train (folder)- data from remaining 70 subjects  
 
 Based on the information included in features_info.txt, the files in the test and train and train folders are formatted and organized the same way. Since the test folder files are smaller with data from just 30 subjects, they became the starting point to understand the data and prepare the files for merging. 
 
@@ -58,21 +59,22 @@ Based on the information included in features_info.txt, the files in the test an
 ```{r test}
     dir("UCI_HAR_Dataset/test")
 ```
+
 To get a sense of how the data were arranged, I also looked at each of the files using atom.  
 
 test(folder):  
-    inertial signals (folder):   
-        each .txt - a set of 35 element vectors.  
-    subject_test.txt - a single column of numbers,no column headers.  
-    x_test.txt - rows of 561 element vectors, no column headers.  
-    y_test.txt - a single column of numbers, no column headers. 
-        1 - 496 occurrences  
-        2 - 471 occurrences  
-        3 - 420 occurrences   
-        4 - 491 occurrences   
-        5 - 532 occurrences  
-        6 - 537 occurrences  
-        Total = 2947  
+    - inertial signals (folder):  
+        - each .txt - a set of 35 element vectors.  
+    - subject_test.txt - a single column of numbers, no column headers.  
+    - x_test.txt - rows of 561 element vectors, no column headers.  
+    - y_test.txt - a single column of numbers, no column headers.  
+        - "1" 496 occurrences  
+        - "2" 471 occurrences  
+        - "3" 420 occurrences  
+        - "4" 491 occurrences   
+        - "5" 532 occurrences  
+        - "6" 537 occurrences  
+                - Total = 2947  
 
 ### Train Folder
 
@@ -85,9 +87,9 @@ Train (folder) mirrors file structure and organization seen in test files, only 
 
 Based on this assignment's requirements, I decided to follow Wickham approach to tidying data when there is one type of data in multiple tables (Ref: Wickham, Section 3.5).  
 
-1. Read the files into a list of tables.  
-2. For each table, add a new column that records the original file name.  
-3. Combine all tables into a single table.  
+    1. Read the files into a list of tables.  
+    2. For each table, add a new column that records the original file name.  
+    3. Combine all tables into a single table.  
 
 In this case, test and train data are one type of data observed for separate groups of people.  Thinking ahead to tidy data,  
 
@@ -119,7 +121,7 @@ From a bookkeeping perspective, a good place to start is with the number lines p
 
 According to README.txt and features_info.txt, features.txt represents the names of the 561 variables recorded. Since the 561 variable list already contains the summary data (mean & std) required to comoplete the assignment, the merge for this assignment will not include the additional detail observations contained in the inertial signals test and train folders. 
 
-Using read.table, create a data frame from each file: subject_test.txt, X_test.txt and Y_test.txt. Create a character vector from features.txt to use later in naming the Y_test data frame columns.
+Using read.table, create a data frame from each file: subject_test.txt, X_test.txt and Y_test.txt.   
 
 ``` {r read test files}
     subject_test <- read.table("UCI_HAR_Dataset/test/subject_test.txt", header = FALSE)
@@ -129,15 +131,22 @@ Using read.table, create a data frame from each file: subject_test.txt, X_test.t
     str(X_test, list.len = 5)
     Y_test <- read.table("UCI_HAR_Dataset/test/Y_test.txt", header = FALSE)
     str(Y_test)
-    features <- readLines("UCI_HAR_Dataset/features.txt")
-    str(features)
 ```
 
-For readibility, set column names. Use conventions described in README.txt and features_info.txt files. This will make it easier when need to filter "mean" and "std" variables.  
+Create a character vector from features.txt to use later in naming the Y_test data frame columns.  Note, the features.txt file has some duplicate variable names, differing only by row/line number index. For example, "fBodyAcc-bandsEnergy()-1,8" appears at row 303, 317, and 331. There are three groups of 14 variables that start with "fBodyAcc()-" and end with an ordered pair use readLInes to keep line number index with variable name.  
+
+``` {r read feature names}
+    features <- readLines("UCI_HAR_Dataset/features.txt")
+    str(features)
+    print (features[303:316])
+```
+
+For readibility, set column names before combining tables. Use conventions described in README.txt and features_info.txt files. This will make it easier later to filter "mean" and "std" variables.  
 
 ``` {r name test data fram columns}
     names(subject_test) <- "subject"
-    names(Y_test) <- "activity"
+    names(Y_test) <- "activity_number"
+    ## Since features.txt contains two columns feature number and feature name
     names(X_test) <- features
 ```
 
@@ -145,14 +154,14 @@ With the exception of adding column names, no data has been transformed or filte
 
 ## Combine test tables into a single table
 
-Use cbind() to merge the three test data files. Bind in order of subject (subject_test), activity (Y_test), then recorded measurements (X_test). Review the result.  
+Each table represents a unique subset of variables, and are linked by the order of the rows rather than a specific, shared variable. Use cbind() rather than one of the dplyr join() commands to merge the three train data files. . Bind in order of subject (subject_test), activity (Y_test), then recorded measurements (X_test). Review the result.  
 
-```{r bind test columns}
+```{r cbind test columns}
     test_merged <- cbind(subject_test, Y_test, X_test)
     str(test_merged, list.len = 5)
 ```
 
-With test_merged's 2947 observations, no rows lost.  563 column variables represent subject and activity columns added to 561 feature measurements.  
+With test_merged's 2947 observations, no rows lost.  563 column variables represent subject and activity_number columns added to 561 feature measurements.  
 
 ## Read train files into a list of tables: subject_train, X_train, and Y_train data
 
@@ -183,7 +192,8 @@ For readibility, set column names to match subject_test, X_test, Y_test. Since X
 
 ``` {r name train data fram columns}
     names(subject_train) <- "subject"
-    names(Y_train) <- "activity"
+    names(Y_train) <- "activity_number"
+    ## Since features,txt contains two columns feature number and feature name
     names(X_train) <- features
 ```
 
@@ -191,14 +201,14 @@ With the exception of adding column names, no data has been transformed or filte
 
 ## Combine train tables into a single table
 
-Use cbind() to merge the three train data files. Bind in order of subject (subject_train), activity (Y_train), then recorded measurements (X_train). Review the result.    
+Like the test data, each train table represents a unique subset of variables, and are linked by the order of the rows rather than a specific, shared variable. Use cbind() rather than one of the dplyr join() commands to merge the three train data files. Bind in order of subject (subject_train), activity_number (Y_train), then recorded measurements (X_train). Review the result.    
 
-```{r bind train columns}
+```{r cbind train columns}
     train_merged <- cbind(subject_train, Y_train, X_train)
     str(train_merged, list.len = 5)
 ```
 
-With train_merged's 7352 observations, no rows lost. 563 variables represent subject and activity columns added to 561 feature measurements.
+With train_merged's 7352 observations, no rows lost. 563 variables represent subject and activity_number columns added to 561 feature measurements.
 
 ## For each test_merge and train_merge table, add a new column that records the original file name.
 
@@ -221,54 +231,96 @@ Using ncol confirms that each new table now has 564 columns. Explicitly specifyi
 
 Since the test_add and train_add tables have the same column organization, use rbind to combine into a single table.  
 
-``` {r combine test and train}
+``` {r rbind test and train}
     test_train <- rbind(test_add, train_add)
     ## 2947 from test + 7352 from train = 10299 in test_train
     ## matches the 10299 instances recorded in raw data
     nrow(test_train)
 ```
 
-Combining test_add and train_add tables into a single data frame with 10299 rows: 2947 from test plus 7352 from train. Matches the 10299 instances recorded in raw data source's webpage.
+Row binding test_add and train_add tables creates a single data frame with 10299 rows: 2947 from test plus 7352 from train. Total rows bound matches the 10299 instances recorded in raw data source's webpage (http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones)
 
 ## Is it tidy?
 
 The test_train dataset is tidy, if not pretty.
 
-    1. Each variable forms a column. The final test_train data frame, includes 564 variables for subject, activity, original file and 561 measured features. While some of the features represent computed values such as mean, they are a single observed result.  
-    2. Each observation forms a row. For this dataset, an observation is of a given subject, labeled by original dataset (test or train), performing a specific activity, and includes 561 measured features.  
-    3. Each type of observational unit forms a table. The collection of variables, although from different samples, represent the same set of observations and includes a variable that identifies the original source of the observation.
+### Each variable forms a column. 
 
-# 2. Extract the measurements on the mean and standard deviation for each measurement.
-
-Based on features_info.txt, observed features representing mean or standard deviation include the string "mean()" and "std()" in their name. Since the test_train data frame already includes variable names, can use grep to extract a list of columns containing the strings "mean()" or "std()".  
-
-``` {r find mean std }
-    mean_columns <- grep("mean()", names(test_train), value = TRUE)
-    std_columns <- grep("std()", names(test_train), value = TRUE)
+The final test_train data frame includes 564 variables for subject, activity, origin file plus 561 measured features. While some of the features represent computed values such as mean, they are a single observed variable.  
     
-    ## some of these came as part of in ordered pairs
-    mean_pairs_col <- grep("Mean", names(test_train), value = TRUE)
+### Each observation forms a row. 
+
+For this dataset, an observation is of a given subject, performing a specific activity, described by 561 measured features, and labeled by origin (test or train).  
+    
+### Each type of observational unit forms a table. 
+
+The collection of variables, although from different samples, represent the same type of observations (subject, activity, measured features) and includes a variable that identifies the original source of the observation.  
+
+### Tidy Data
+
+Based on Wickham's standards, the data frame test_train is tidy. Although not explicitly mentioned in the definition of tidy data, Wickham also discusses the order in which variables should appear in a dataset:
+
+>"Fixed variables describe the experimental design and are known in advance... Measured variables are what we actually measure in the study. Fixed variables should come first, followed by measured variables, each ordered so that related variables are contiguous."
+
+By this standard, subject, acivity and original file would be fixed variables and should appear contiguously and first.  Measured variables would be the items described by the feature measurements. This could be accomplished by moving the original_file column to the first column of the data frame.  
+```{r tidy-er Wickham finesse}
+    ## new dataframe with fixed variable first
+    tidyframe <- select(test_train, 564, 1:563)
 ```
+
+Tidy data addresses the shape and organization of data that make it software readible rather than what makes it human readible: tidyframe is tidy data. Descriptive variable names will be addressed later in the assignment (see sections 3 & 4).  
+
+# 2. Extract only the measurements on the mean and standard deviation for each measurement.
+
+Based on features_info.txt, observed features representing mean or standard deviation include the string "mean()", "std()" or "Mean" in their name. Since tidyframe already includes variable names, grep can extract a list of columns containing the target strings. 
+
+``` {r extract mean, std, Mean data }
+    ## use grep to find target strings
+    mean_std_columns <- grep("Mean|mean()|std()", names(tidyframe), value = TRUE)
+    mean_std_tidyframe <- select(tidyframe, original_file, activity_number, subject, mean_std_columns) 
+    str(mean_std_tidyframe,list.len = 5)
+```
+
+There were 89 total occurrences of the strings "mean()", "Mean" and "std()" in the original features.txt file.  However, there were three rows where "Mean" appeared twice.  Including the three fixed variables (original_file, activity_number, subject) the final data frame correctly includes 89 variables.
 
 # 3. Use descriptive activity names to name the activities in the data set
 
+An activity id/number and name is listed in activity_labels.txt for each unique activity in the dataset. Read the activity_labels.txt file into a table to use with a join to replace activity numbers with names in tidyframe.  
 
+```{r build activity table}
+    activity_labels <- read.table("UCI_HAR_Dataset/activity_labels.txt", header = FALSE)
+    str(activity_labels)
+```
+
+Before doing any join based on a key, like activity, double check to make sure there will be a mapping for each.  An outer join will substitute an NA for missed joins, but it would be better to know ahead of time about missing data. 
+
+```{r unique activity} 
+    uactivity <- unique(tidyframe$activity_number)
+    str(uactivity)
+    uactivity <- unique(mean_std_tidyframe$activity_number)
+    str(uactivity)   
+```
+
+From the above, there are 6 unique activities in tidyframe and mean_std_tidyframe, with values ranging from 1-6. 
 
 # 4. Appropriately label the data set with descriptive variable names.
 
+The column names for the subject, activity and measured variables were assigned from features.txt to the subject_, Y_, and X_ tables just before the three were merged to create the test_merged and train_merged data frames. Naming the columns before the cbind() merges, allowed for better visual inspection of new data frames.  Used str() to review the merge and make sure that columns were bound in the correct order.  With subject and activity_number both being numeric, it might take a longer scroll through the new data frames to make sure they had been assigned to the correct column.
 
-
-# 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+# 5. From the data set in step 4, create a second, independent tidy data set with the average of each variable for each activity_number and each subject.
 
 
 # Resources
  
-Several resources were very helpful in strategizing and working with the datasets in the assignment.
+In addition to lecture notes, several resources were very helpful in strategizing and working with the datasets in the assignment.
 
 ## Packages
 
-R.utils  
-dplyr  
+R.utils - Utility functions useful when programming and developing R packages.  
+Bengtsson, H. The R.oo package - Object-Oriented Programming with References Using Standard R Code, Proceedings of the 3rd International Workshop on Distributed Statistical Computing (DSC 2003), ISSN 1609-395X, Hornik, K.; Leisch, F. & Zeileis, A. (ed.), 2003
+
+dplyr - provides a flexible grammar of data manipulation. It's the next iteration of plyr, focused on tools for working with data frames (hence the d in the name).
+Maintainer: Hadley Wickham hadley@rstudio.com (0000-0003-4757-117X). Authors: Romain François (0000-0002-2444-4226), Lionel Henry, Kirill Müller (0000-0002-1416-3412), Other contributors: RStudio [copyright holder, funder].
 
 ## Tidy Data
 

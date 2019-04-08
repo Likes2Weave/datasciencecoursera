@@ -12,11 +12,15 @@
 ## 2. Each observation forms a row.
 ## 3. Each type of observational unit forms a table.
 
-install.packages("R.utils")
+## Double check working directory with Github & version control
+## setwd("~/GitHub/datasciencecoursera/Course3")
+
+##install.packages("R.utils")
 library("R.utils")
-install.packages("dplyr")
+##install.packages("dplyr")
 library(dplyr)
 
+## 1. Merge the training and the test sets to create one data set
 ## Start with the data in test file, since it is smaller
 ## Read test data into data files - 2947 lines each
 ## Name of the data file will match name of text file
@@ -25,11 +29,17 @@ subject_test <- read.table("UCI_HAR_Dataset/test/subject_test.txt", header = FAL
 X_test <- read.table("UCI_HAR_Dataset/test/X_test.txt", header = FALSE)
 Y_test <- read.table("UCI_HAR_Dataset/test/Y_test.txt", header = FALSE)
 
+## features.txt has some duplicate variable names, differing only by index
+## fBodyAcc-bandsEnergy()-1,8 appears at 303, 317, 331
+## there are three groups of 14 variables that start with "fBodyAcc()-" and end with an ordered pair
+## use readLInes to keep line number index with variable name
+features <- readLines("UCI_HAR_Dataset/features.txt")
+
 ## Set column names, follow conventions used in original dataset README.txt and features_info.txt
 ## Later update column names to be more descriptive
-names(subject_merge) <- "subject"
-names(Y_merge) <- "activity"
-names(X_merge) <- features
+names(subject_test) <- "subject"
+names(Y_test) <- "activity_number"
+names(X_test) <- features
 
 ## Bind in order of subject (subject_test), activity (Y_test), then recorded measurements (X_test).
 test_merged <- cbind(subject_test, Y_test, X_test)
@@ -44,7 +54,7 @@ Y_train <- read.table("UCI_HAR_Dataset/train/Y_train.txt", header = FALSE)
 ## Set column names, follow conventions used in original dataset README.txt and features_info.txt
 ## Later update column names to be more descriptive
 names(subject_train) <- "subject"
-names(Y_train) <- "activity"
+names(Y_train) <- "activity_number"
 names(X_train) <- features
 
 ## Bind in order of subject (subject_test), activity (Y_test), then recorded measurements (X_test).
@@ -60,3 +70,18 @@ train_add <- mutate(train_merged, original_file = "train")
 ## matches the 10299 instances recorded in raw data
 test_train <- rbind(test_add, train_add)
 
+## new dataframe with fixed variable first
+tidyframe <- select(test_train, 564, 1:563)
+
+## 2. Extract only the measurements on the mean and standard deviation for each measurement.
+## Based on features_info.txt, observed features representing mean or standard deviation 
+## include "mean()", "std()" or "Mean" in their name. 
+## use grep to find target strings Mean, mean(), std()
+## should get 89 variables = sum of occurrence of each string
+## not including original_file, activity_number, subject
+mean_std_columns <- grep("Mean|mean()|std()", names(tidyframe), value = TRUE)
+mean_std_tidyframe <- select(tidyframe, original_file, activity_number, subject, mean_std_columns )
+
+## 3. Use descriptive activity names to name the activities in the data set
+## An activity id/number and name is listed in activity_labels.txt for each unique activity
+activity_labels <- read.table("UCI_HAR_Dataset/activity_labels.txt", header = FALSE)
