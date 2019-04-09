@@ -38,7 +38,7 @@ features <- readLines("UCI_HAR_Dataset/features.txt")
 ## Set column names, follow conventions used in original dataset README.txt and features_info.txt
 ## Later update column names to be more descriptive
 names(subject_test) <- "subject"
-names(Y_test) <- "activity_number"
+names(Y_test) <- "activityNumber"
 names(X_test) <- features
 
 ## Bind in order of subject (subject_test), activity (Y_test), then recorded measurements (X_test).
@@ -54,7 +54,7 @@ Y_train <- read.table("UCI_HAR_Dataset/train/Y_train.txt", header = FALSE)
 ## Set column names, follow conventions used in original dataset README.txt and features_info.txt
 ## Later update column names to be more descriptive
 names(subject_train) <- "subject"
-names(Y_train) <- "activity_number"
+names(Y_train) <- "activityNumber"
 names(X_train) <- features
 
 ## Bind in order of subject (subject_test), activity (Y_test), then recorded measurements (X_test).
@@ -62,8 +62,8 @@ train_merged <- cbind(subject_train, Y_train, X_train)
 
 ## For each test_merge and train_merge table, add a new column that records the original file name.
 ## library(dplyr)
-test_add <- mutate(test_merged, original_file = "test")
-train_add <- mutate(train_merged, original_file = "train")
+test_add <- mutate(test_merged, originalFile = "test")
+train_add <- mutate(train_merged, originalFile = "train")
 
 ## Combine test_add and train_add tables into a single table
 ## 2947 from test + 7352 from train = 10299 in test_train
@@ -75,13 +75,32 @@ tidyframe <- select(test_train, 564, 1:563)
 
 ## 2. Extract only the measurements on the mean and standard deviation for each measurement.
 ## Based on features_info.txt, observed features representing mean or standard deviation 
-## include "mean()", "std()" or "Mean" in their name. 
-## use grep to find target strings Mean, mean(), std()
+## include "mean()", "std()" in their name. 
+## use grep to find target strings mean(), std()
 ## should get 89 variables = sum of occurrence of each string
-## not including original_file, activity_number, subject
-mean_std_columns <- grep("Mean|mean()|std()", names(tidyframe), value = TRUE)
-mean_std_tidyframe <- select(tidyframe, original_file, activity_number, subject, mean_std_columns )
+## not including originalFile, activityNumber, subject
+mean_std_columns <- grep("mean()|std()", names(tidyframe), value = TRUE)
+mean_std_tidyframe <- select(tidyframe, originalFile, activityNumber, subject, mean_std_columns )
 
 ## 3. Use descriptive activity names to name the activities in the data set
 ## An activity id/number and name is listed in activity_labels.txt for each unique activity
 activity_labels <- read.table("UCI_HAR_Dataset/activity_labels.txt", header = FALSE)
+names(activity_labels) <- c("activityNumber","activityName")
+                            
+## apply names to mean_std_tidyframe w/ join, move name to be contiguous w/ fixed variables
+activity_tidyframe <- inner_join(mean_std_tidyframe, activity_labels, by = "activityNumber")
+activity_tidyframe <- select (activity_tidyframe, originalFile, activityName, subject, 4:82)
+
+## Fix replace dashes and remove parentheses
+names_dash_to_under <- gsub("-", "_", names(activity_tidyframe))
+names_no_paren <- gsub("\\(\\)", "", names_dash_to_under)
+
+## remove leading digits, set new variable names
+names_no_digits <- gsub("^[0-9]{1,3} ", "", names_no_paren)
+names(activity_tidyframe) <- names_no_digits
+
+## Iteration 1, omit original_file (column 1) from data
+final_tidyframe_1 <- activity_tidyframe %>%
+    select (2:82) %>%
+    group_by(subject, activityName) %>% 
+    summarise_all(mean)

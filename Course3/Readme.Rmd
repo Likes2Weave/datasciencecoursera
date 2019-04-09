@@ -133,7 +133,7 @@ Using read.table, create a data frame from each file: subject_test.txt, X_test.t
     str(Y_test)
 ```
 
-Create a character vector from features.txt to use later in naming the Y_test data frame columns.  Note, the features.txt file has some duplicate variable names, differing only by row/line number index. For example, "fBodyAcc-bandsEnergy()-1,8" appears at row 303, 317, and 331. There are three groups of 14 variables that start with "fBodyAcc()-" and end with an ordered pair use readLInes to keep line number index with variable name.  
+Create a character vector from features.txt to use later in naming the Y_test data frame columns.  Note, the features.txt file has some duplicate variable names, differing only by row/line number index. For example, "fBodyAcc-bandsEnergy()-1,8" appears at row 303, 317, and 331. There are three groups of 14 variables that start with "fBodyAcc-bandsEnergy()" and end with an ordered pair in rows 303-344. Use readLines to keep line number index with variable name.  
 
 ``` {r read feature names}
     features <- readLines("UCI_HAR_Dataset/features.txt")
@@ -150,7 +150,7 @@ For readibility, set column names before combining tables. Use conventions descr
     names(X_test) <- features
 ```
 
-With the exception of adding column names, no data has been transformed or filtered. This is useful in case something goes wrong downstream and need to reset to original values. Each file (subject_test.txt, X_test.txt and Y_test.txt) has 2947 rows, and represent different variables of a single observation. 
+With the exception of adding column names, no data has been transformed or filtered. This is useful in case something goes wrong downstream and need to reset to original values. Each file (subject_test.txt, X_test.txt and Y_test.txt) has 2947 rows, and represent different measured variables of a single observation. 
 
 ## Combine test tables into a single table
 
@@ -197,7 +197,7 @@ For readibility, set column names to match subject_test, X_test, Y_test. Since X
     names(X_train) <- features
 ```
 
-With the exception of adding column names, no data has been transformed or filtered. This is useful in case something goes wrong downstream and need to reset to original values. Each file (subject_train.txt, X_train.txt and Y_train.txt) has 7352 rows, and represent different variables of a single observation. 
+With the exception of adding column names, no data has been transformed or filtered. This is useful in case something goes wrong downstream and need to reset to original values. Each file (subject_train.txt, X_train.txt and Y_train.txt) has 7352 rows, and represent different measured variables of a single observation. 
 
 ## Combine train tables into a single table
 
@@ -242,15 +242,19 @@ Row binding test_add and train_add tables creates a single data frame with 10299
 
 ## Is it tidy?
 
-The test_train dataset is tidy, if not pretty.
+The test_train data set is tidy, if not pretty.
 
 ### Each variable forms a column. 
 
 The final test_train data frame includes 564 variables for subject, activity, origin file plus 561 measured features. While some of the features represent computed values such as mean, they are a single observed variable.  
+
+It might be tempting to split the columns by parsing some of the variable names.  For example, the first 40 rows could be reshaped based on feature (tBodyAcc), calculation (mean(), std(), min(), max(), ...) and axis (X, Y, Z).  With 561 measurements split into columns based on feature, calculationa and axis, the data set would become very wide.  Furthermore, not every variable includes an axis designation. In David Hood's blog, he writes, "[W]ithin the broad set theory background it becomes what is the best tidy form of data to answer a specific question."  The next part of the assignnment is to extract only the mean() and std() observations. The rows can be extracted using simple grep commnads that do not reshaping or risk changing the data.
+
+For this application the variables are tidy.
     
 ### Each observation forms a row. 
 
-For this dataset, an observation is of a given subject, performing a specific activity, described by 561 measured features, and labeled by origin (test or train).  
+For this data set, an observation is of a given subject, performing a specific activity, described by 561 measured features, and labeled by origin (test or train).  
     
 ### Each type of observational unit forms a table. 
 
@@ -258,7 +262,7 @@ The collection of variables, although from different samples, represent the same
 
 ### Tidy Data
 
-Based on Wickham's standards, the data frame test_train is tidy. Although not explicitly mentioned in the definition of tidy data, Wickham also discusses the order in which variables should appear in a dataset:
+Based on Wickham's standards, the data frame test_train is tidy. Although not explicitly mentioned in the definition of tidy data, Wickham also discusses the order in which variables should appear in a data set:
 
 >"Fixed variables describe the experimental design and are known in advance... Measured variables are what we actually measure in the study. Fixed variables should come first, followed by measured variables, each ordered so that related variables are contiguous."
 
@@ -268,24 +272,26 @@ By this standard, subject, acivity and original file would be fixed variables an
     tidyframe <- select(test_train, 564, 1:563)
 ```
 
-Tidy data addresses the shape and organization of data that make it software readible rather than what makes it human readible: tidyframe is tidy data. Descriptive variable names will be addressed later in the assignment (see sections 3 & 4).  
+Tidy data addresses the shape and organization of data that make it software readible rather than what makes it human readible: tidyframe is tidy data. Descriptive variable names and possible reshaping will be addressed later in the assignment (see sections 3 & 4).  
 
 # 2. Extract only the measurements on the mean and standard deviation for each measurement.
 
-Based on features_info.txt, observed features representing mean or standard deviation include the string "mean()", "std()" or "Mean" in their name. Since tidyframe already includes variable names, grep can extract a list of columns containing the target strings. 
+Based on features_info.txt, observed features representing mean or standard deviation include the string "mean()" or "std()" in their name. Features that included "Mean" as part of an ordered pair were excluded since they are inputs to the angle measurements and not discrete entities.
 
-``` {r extract mean, std, Mean data }
+Tidyframe includes variable names, use grep to extract a list of columns containing the target strings. 
+
+``` {r extract mean, std }
     ## use grep to find target strings
-    mean_std_columns <- grep("Mean|mean()|std()", names(tidyframe), value = TRUE)
+    mean_std_columns <- grep("mean()|std()", names(tidyframe), value = TRUE)
     mean_std_tidyframe <- select(tidyframe, original_file, activity_number, subject, mean_std_columns) 
     str(mean_std_tidyframe,list.len = 5)
 ```
 
-There were 89 total occurrences of the strings "mean()", "Mean" and "std()" in the original features.txt file.  However, there were three rows where "Mean" appeared twice.  Including the three fixed variables (original_file, activity_number, subject) the final data frame correctly includes 89 variables.
+There were 79 total occurrences of the strings "mean()" and "std()" in the original features.txt file.  Including the three fixed variables (original_file, activity_number, subject) the final data frame correctly includes 82 variables.
 
 # 3. Use descriptive activity names to name the activities in the data set
 
-An activity id/number and name is listed in activity_labels.txt for each unique activity in the dataset. Read the activity_labels.txt file into a table to use with a join to replace activity numbers with names in tidyframe.  
+An activity id/number and name is listed in activity_labels.txt for each unique activity in the data set. Read the activity_labels.txt file into a table to use with a join to replace activity numbers with names in tidyframe.  
 
 ```{r build activity table}
     activity_labels <- read.table("UCI_HAR_Dataset/activity_labels.txt", header = FALSE)
@@ -303,30 +309,160 @@ Before doing any join based on a key, like activity, double check to make sure t
 
 From the above, there are 6 unique activities in tidyframe and mean_std_tidyframe, with values ranging from 1-6. 
 
+Assured there are no missing values use mutate to add activity name, which is more descriptive that a number.  
+
+``` {r build activity_labels table}
+    ## An activity id/number and name is listed in activity_labels.txt for each unique activity
+    activity_labels <- read.table("UCI_HAR_Dataset/activity_labels.txt", header = FALSE)
+    ## name the columns
+    names(activity_labels) <- c("activity_number","activity_name")
+                            
+    ## apply names to mean_std_tidyframe using join
+    activity_tidyframe <- inner_join(mean_std_tidyframe, activity_labels, by = "activity_number")
+    ## move column to be contiguous with fixed variables
+    activity_tidyframe <- select (activity_tidyframe, original_file, activity_name, subject, 4:82)
+    
+    str(activity_tidyframe, list.len = 5)
+```
+
+The new data frame activity_tidyframe includes a fixed variable, activity_name, to describe the activities in the data set.
+
 # 4. Appropriately label the data set with descriptive variable names.
 
-The column names for the subject, activity and measured variables were assigned from features.txt to the subject_, Y_, and X_ tables just before the three were merged to create the test_merged and train_merged data frames. Naming the columns before the cbind() merges, allowed for better visual inspection of new data frames.  Used str() to review the merge and make sure that columns were bound in the correct order.  With subject and activity_number both being numeric, it might take a longer scroll through the new data frames to make sure they had been assigned to the correct column.
+The column names for the subject, activity and measured variables were assigned earlier to the subject_, Y_, and X_ tables just before the three were merged to create the test_merged and train_merged data frames.  
 
-# 5. From the data set in step 4, create a second, independent tidy data set with the average of each variable for each activity_number and each subject.
+Naming the columns before the cbind() merges, allowed for better visual inspection of new data frames.  Used str() to review the merge and make sure that columns were bound in the correct order.  With subject and activity_number both being numeric, it might be more challenging to scroll through the new data frames to make sure the columns had been bound in the correct order.  
 
+## How descriptive?
+
+The question remains, could the variable names be more descriptive?  It depends on the consumer.  To one who extracts and studies this type of data, the names are very descriptive. There is always a trade off between how descriptive to make a variable name, and how practical it would be to use a very long name for data exploration and study.  
+
+Assuming the consumer of the final data set is knowledgeable about the field, the variable names listed in features.txt would be satifactory. However, they might appreciate some standardization and fine tuning.
+
+## Possible to standardize variable names from features.txt?
+
+### Remove leading digits from measured variables
+
+Earlier, it was discovered there are three groups of 14 identical variables that start with "fBodyAcc-bandsEnergy()" and end with an ordered pair in lines 303 through 344 of features.txt. The only way to make these names unique was to include the row number. Are any of these variables included in activity_tidyframe?
+
+```{confirm possible duplicates not included}
+    grep("fBodyAcc-bandsEnergy()", names(activity_tidyframe), value = TRUE)
+```
+
+None of these variables are included with the mean() or std() calculated measurements extracted to create activity_tidyframe. They do not need to be included in the standardizing process for the activity_tidyframe data set. The leading digits can be removed.
+
+### Standardized capitals in variable names
+
+According to Wickham there are several approaches to creating variable names.  The UCI HAR Dtaset authors chose the camelback style... for data frame variables and ... for file names. With the exception of data frame and vectors used internally in run_analysis.R, their standard was followed for this assignment.
+
+Because special characters like dashes and parentheses can create problems, use gsub to remove or replace them.
+
+``` {r gsub comma, parentheses}
+    names_dash_to_under <- gsub("-", "_", names(activity_tidyframe))
+    names_no_paren <- gsub("\\(\\)", "", names_dash_to_under)
+```
+
+Before doing a global substitution, its a good idea to see what your search parameters return.  Do you get all occurrences? Did your expression get greedy?
+
+``` {r test regex to remove digits}
+    find_digits <- grep("^[0-9]{1,3} ", names_no_paren, value = TRUE)
+    str(find_digits, list.len = 5 )
+```
+
+Looks like we have 79 variables with leading digits plus a space. Looks fine: 79 variables, three fixed, yields 82 total. Use gsub to remove leading digits and space and update variable names.
+
+``` {r remove leading digits}
+    names_no_digits <- gsub("^[0-9]{1,3} ", "", names_no_paren)
+    names(activity_tidyframe) <- names_no_digits
+```
+
+The measured variable names are now standardized, descriptive text for a consumer familiar with the types of calculations used.  
+
+# 5. From the data set in step 4, create a second, independent tidy data set with the average of each variable for each activity and each subject.
+
+## First Iteration - Measured features represent a single value
+
+The most direct approach for creating a second data set with the average of each activity and each subject would be to compute the column mean for each of the measured variables as listed in features.txt, grouped by subject and activity. 
+
+``` {r iteration 1}
+final_tidyframe_1 <- activity_tidyframe %>%
+    select (2:82) %>%
+    group_by(subject, activityName) %>% 
+    summarise_all(mean)
+```
+
+With thirty subjects and six activities, final_tidyframe_1 should have 180 rows.  The original_file info was not needed, and was omitted from summary data, resulting in 81 columns.
+
+This approach is appropriate if the data set consumer considered each of the 79 measured variables a single unit of data.  Grouping by subject and then activity created a data set that could be used as is, or to further summarize data by additional combinations of subject or activity.
+
+## Second Iteration - Measured features represent more than one value
+
+There may be some consumers that would prefer a wider data set.  Looking at the data frame extracted in Part 4, the mean() and std() variables contain three segments: feature, calculation and reference. For tBodyAcc_mean_X, tBodyAcc would be the feature, mean would be the calculation and X would be the reference.  Summarized: 
+
+* features as measured variable (11): fBodyAcc, fBodyAccJerk, fBodyBodyAccJerk, fBodyGyro, fBodyBodyGyro, fBodyBodyGyroJerk, tBodyAcc, tBodyAccJerk, tBodyGyro, tBodyGyroJerk, tGravityAcc
+
+* Calculation (3): mean, meanFreq, std
+
+* Reference (4): X-axis, Y-axis, Z-Axis Mag
+
+The data frame could be reshaped to allow feature variable grouping by subject and activity, as well as calculation and/or reference. Grouping by all four would yield summary data equivalent to the first iteration above. However, not all possible combination of feature, calculation and reference are referenced by the data.  Introduce "NA" to reflect missing elements and must strexclude NA's from mean calculations.
+
+## Summary: A tidy data set
+
+To meet the rubric, the data set may be narrow or wide, as long as it is tidy. A tidy data set must meet all three of Wickham's conditions:  
+
+    1. Each variable forms a column.  
+        - A variable is a measured feature as recorded
+        - A Variable is a specific feature segmented by calculation and reference
+  
+    2. Each observation forms a row. 
+        - An observation is one subject, activity, and set of recorded features
+        - An observation is one subject, activity, calculation, reference and feature
+
+    3. Each type of observational unit forms a table.  
+        - In both cases, the observational units are consistent
+
+Whether the first or second data set would be considered tidy, would be based the consumer's definition of variable: as recorded or further segmented by calculation and reference. 
+
+Wickham and Hood discussed that "tidy-ness" is a function of how well the data set fits the task.  For looking at the variable averages grouped by subject and activity, both iterations would work.  If the consumer needed more grouping options, the second would provide the greatest flexibility.  Thus the second one will be uploaded to complete the assignment.  
+
+### Cautions
+
+As with creating descriptive varaibles, there is a trade off between using data as originally recorded and data as segmented. R offers power tools for reshaping data, but just because one can reshape the data, does not mean the reshaped version is meaningful.  Reshaping data sets must be accompanied by a solid knowledge of the derivation of the data and its applications.  
+
+Consider an example, with a quick look through my pantry an observer might record   
+
+* shelf 1: square based, plastic bins, medium  
+* shelf 2: square based, plastic bins, large, medium, small  
+* shelf 3: glass jars and plastic bags, mixed inside square baskets  
+* shelf 4: canned goods, plastic bags  
+* floor: canned goods  
+
+It might be tempting to re-organize my pantry storage by storage type: bags, bins, baskets, cans, jars.  It would be very tidy, but a total disaster for meal prep because it is not the container that is critical, but the contents and applications.  This would be a more valid recording of my pantry:
+
+* shelf 1: sweeteners, chocolate, garnishes for desserts
+* shelf 2: flours, rising agents for baking 
+* shelf 3: nuts, seeds, cereals and dried fruits for making granola & trail mix
+* shelf 4: beans, pasta, grains for side dishes  
+* floor: dog food
+
+I definitely do not want the dog food next to the refried beans, or the pumpkin seeds with the mung beans!
+
+Returning to the submitted data set, although the second iteration appears to be the tidy-est, segmenting the feature variables may or may not add to the value of the data set. To make sure the consumer could recontruct the origonal data set, I added a key with the original variable name in the codebook.  
 
 # Resources
  
-In addition to lecture notes, several resources were very helpful in strategizing and working with the datasets in the assignment.
-
-## Packages
-
-R.utils - Utility functions useful when programming and developing R packages.  
-Bengtsson, H. The R.oo package - Object-Oriented Programming with References Using Standard R Code, Proceedings of the 3rd International Workshop on Distributed Statistical Computing (DSC 2003), ISSN 1609-395X, Hornik, K.; Leisch, F. & Zeileis, A. (ed.), 2003
-
-dplyr - provides a flexible grammar of data manipulation. It's the next iteration of plyr, focused on tools for working with data frames (hence the d in the name).
-Maintainer: Hadley Wickham hadley@rstudio.com (0000-0003-4757-117X). Authors: Romain François (0000-0002-2444-4226), Lionel Henry, Kirill Müller (0000-0002-1416-3412), Other contributors: RStudio [copyright holder, funder].
+In addition to lecture notes, several resources were very helpful in strategizing and working with the data sets in the assignment.  
 
 ## Tidy Data
 
 David Hood's "thoughtfulbloke" blog at https://thoughtfulbloke.wordpress.com/2015/09/09/getting-and-cleaning-the-assignment/  (04/02/2019)
-Hadley Wickham's "Tidy Data" paper at https://vita.had.co.nz/papers/tidy-data.pdf  (04/03/2019)  
-Hadley Wickam & Garrett Grolemund, R for Data Science
 
-## General R
+Hadley Wickham's "Tidy Data" paper at https://vita.had.co.nz/papers/tidy-data.pdf  (04/03/2019)
+
+Lionel Henry & Hadley Wickham, "Tidy Evaluation" at https://tidyeval.tidyverse.org/index.html (04/09/2019)
+
+Hadley Wickam & Garrett Grolemund, "R for Data Science," 
+
+## General 
 R Markdown Cheatsheet at https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf  
