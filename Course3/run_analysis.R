@@ -100,7 +100,7 @@ names_no_digits <- gsub("^[0-9]{1,3} ", "", names_no_paren)
 names(activity_tidyframe) <- names_no_digits
 
 ## Iteration 1, omit original_file (column 1) from data
-final_tidyframe_1 <- activity_tidyframe %>%
+final_tidyframe <- activity_tidyframe %>%
     select (2:82) %>%
     group_by(subject, activityName) %>% 
     summarise_all(mean)
