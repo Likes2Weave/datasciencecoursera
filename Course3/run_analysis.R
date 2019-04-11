@@ -97,10 +97,19 @@ names_no_paren <- gsub("\\(\\)", "", names_dash_to_under)
 
 ## remove leading digits, set new variable names
 names_no_digits <- gsub("^[0-9]{1,3} ", "", names_no_paren)
-names(activity_tidyframe) <- names_no_digits
 
-## Iteration 1, omit original_file (column 1) from data
-final_tidyframe <- activity_tidyframe %>%
+## descriptive_tidyframe will be identical to activity_tidyframe except for variable names
+descriptive_tidyframe <- activity_tidyframe
+names(descriptive_tidyframe) <- names_no_digits
+
+## average variables, group by subject & activity, omit original_file (column 1) from data
+final_tidyframe <- descriptive_tidyframe %>%
     select (2:82) %>%
     group_by(subject, activityName) %>% 
     summarise_all(mean)
+
+## Final Step - output to csv for end user
+write.csv(final_tidyframe, file = "final_tidyframe.csv")
+
+## to read file:
+## my_final_tidyframe <- read.csv("final_tidyframe.csv", header = TRUE, sep = ",")
