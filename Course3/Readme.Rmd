@@ -80,16 +80,11 @@ To read the file:
 
 ##  UCI HAR Data Set   
 
-Data collected from the accelerometers from the Samsung Galaxy S smartphone was made available to download. A full description is available at the site where the data was obtained:
+Data collected from the accelerometers from the Samsung Galaxy S smartphone was made available to download. From: Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
 
-http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
-
-Here are the data for the project:
-
-https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+[Full description](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones)  [Link to data](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip)
 
 After downloading and unzipping files, I renamed the directory from "UCI HAR Dataset" to "UCI_HAR_Dataset" to avoid possible issues with spaces in a pathname. 
-
 
 ```{r Dataset}
     dir("UCI_HAR_Dataset")
@@ -501,11 +496,11 @@ Segmenting the feature variables without a solid knowledge of how the feature va
 ## Output file: final_tidyframe.csv
 
 ```{r write csv file}
-    ## write to a csv for submission
-    write.csv(final_tidyframe, file = "final_tidyframe.csv")
+## write to a csv for submission
+write.table(final_tidyframe, "final_tidyframe.csv", row.names = FALSE, col.names = TRUE, sep = ",")
 
-    ## to read file:
-    #my_final_tidyframe <- read.csv("final_tidyframe.csv", header = TRUE, sep = ",")
+## to read file:
+##my_final_tidyframe <- read.table("final_tidyframe.csv", header = TRUE, sep = ",")
 ```
 
 # Resources
