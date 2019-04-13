@@ -3,17 +3,21 @@ title: "ReadMe"
 author: "Coleen Smith"
 date: "4/2/2019"
 output:
-  github_document:
-      toc: true
   pdf_document:
+      toc: true
+  github_document:
       toc: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ## packages needed
 library(R.utils)
 library(dplyr)
+
+## codebook generator alternative
+library(dataMaid)
 ```
 
 # Assignment
@@ -29,7 +33,7 @@ This assignment will create one R script called run_analysis.R that does the fol
 The assignment must also meet the following criteria:  
 
     1. The submitted data set is tidy.
-        - final_tidyframe.csv
+        - final_tidyframe.txt
     2. The Github repo contains the required scripts.  
         - run_anaylysis.R  
     3. GitHub contains a code book that modifies and updates the available codebooks with the data to indicate all the variables and summaries calculated, along with units, and any other relevant information.  
@@ -78,9 +82,9 @@ To prepare for Part 5, I tried to make sure that the output from each part of th
 Based on my core assumption, activity_tidyframe was tidy data.  To average each measured variable for each combination of subject and activity, I used select (to exclude the source of the original file), group_by to organize the data and summarize_all(mean) to average each measured variable.
 Part 5 final output: final_tidyframe
 
-Assignment File Submitted: final_tidyframe.csv
+Assignment File Submitted: final_tidyframe.txt
 To read the file: 
-    my_final_tidyframe <- read.csv("final_tidyframe.csv", header = TRUE, sep = ",")
+my_final_tidyframe <- read.table("final_tidyframe.txt", header = TRUE, row.names = FALSE, sep = ",")
 
 # Analysis  
 
@@ -500,14 +504,14 @@ Wickham and Hood also discussed that "tidy-ness" is a function of how well the d
 
 Segmenting the feature variables without a solid knowledge of how the feature variable were computed and used, may not add to the value of the data set. There are likely alternate tidy arrangements of the data, but without a better understanding of the variable inputs, I chose not to reshape the data.
 
-## Output file: final_tidyframe.csv
+## Output file: final_tidyframe.txt
 
-```{r write csv file}
-## write to a csv for submission
-write.table(final_tidyframe, "final_tidyframe.csv", row.names = FALSE, col.names = TRUE, sep = ",")
+```{r write txt file}
+## write to a txt for submission
+write.table(final_tidyframe, "final_tidyframe.txt", row.names = FALSE, col.names = TRUE, sep = ",")
 
 ## to read file:
-## my_final_tidyframe <- read.table("final_tidyframe.csv", header = TRUE, sep = ",")
+## my_final_tidyframe <- read.table("final_tidyframe.txt", header = TRUE, sep = ",")
 ```
 
 # Resources

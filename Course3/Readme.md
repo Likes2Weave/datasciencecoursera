@@ -40,7 +40,7 @@ Coleen Smith
     -   [Not So Tidy - Do measured features represent more than one value?](#not-so-tidy---do-measured-features-represent-more-than-one-value)
     -   [Tidy Data - Measured features represent a single value](#tidy-data---measured-features-represent-a-single-value)
     -   [Summary: A tidy data set](#summary-a-tidy-data-set)
-    -   [Output file: final\_tidyframe.csv](#output-file-final_tidyframe.csv)
+    -   [Output file: final\_tidyframe.txt](#output-file-final_tidyframe.txt)
 -   [Resources](#resources)
 -   [Afterword: Tidy Data, Tidy Pantry](#afterword-tidy-data-tidy-pantry)
 
@@ -58,7 +58,7 @@ This assignment will create one R script called run\_analysis.R that does the fo
 The assignment must also meet the following criteria:
 
     1. The submitted data set is tidy.
-        - final_tidyframe.csv
+        - final_tidyframe.txt
     2. The Github repo contains the required scripts.  
         - run_anaylysis.R  
     3. GitHub contains a code book that modifies and updates the available codebooks with the data to indicate all the variables and summaries calculated, along with units, and any other relevant information.  
@@ -111,7 +111,7 @@ To prepare for Part 5, I tried to make sure that the output from each part of th
 
 Based on my core assumption, activity\_tidyframe was tidy data. To average each measured variable for each combination of subject and activity, I used select (to exclude the source of the original file), group\_by to organize the data and summarize\_all(mean) to average each measured variable. Part 5 final output: final\_tidyframe
 
-Assignment File Submitted: final\_tidyframe.csv To read the file: my\_final\_tidyframe &lt;- read.csv("final\_tidyframe.csv", header = TRUE, sep = ",")
+Assignment File Submitted: final\_tidyframe.txt To read the file: my\_final\_tidyframe &lt;- read.table("final\_tidyframe.txt", header = TRUE, row.names = FALSE, sep = ",")
 
 Analysis
 ========
@@ -713,15 +713,15 @@ Wickham and Hood also discussed that "tidy-ness" is a function of how well the d
 
 Segmenting the feature variables without a solid knowledge of how the feature variable were computed and used, may not add to the value of the data set. There are likely alternate tidy arrangements of the data, but without a better understanding of the variable inputs, I chose not to reshape the data.
 
-Output file: final\_tidyframe.csv
+Output file: final\_tidyframe.txt
 ---------------------------------
 
 ``` r
-## write to a csv for submission
-write.table(final_tidyframe, "final_tidyframe.csv", row.names = FALSE, col.names = TRUE, sep = ",")
+## write to a txt for submission
+write.table(final_tidyframe, "final_tidyframe.txt", row.names = FALSE, col.names = TRUE, sep = ",")
 
 ## to read file:
-## my_final_tidyframe <- read.table("final_tidyframe.csv", header = TRUE, sep = ",")
+## my_final_tidyframe <- read.table("final_tidyframe.txt", header = TRUE, sep = ",")
 ```
 
 Resources

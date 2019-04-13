@@ -108,8 +108,8 @@ final_tidyframe <- descriptive_tidyframe %>%
     group_by(subject, activityName) %>% 
     summarise_all(mean)
 
-## Final Step - output to csv for end user
-write.table(final_tidyframe, "final_tidyframe.csv", row.names = FALSE, col.names = TRUE, sep = ",")
+## Final Step - output to txt for end user
+write.table(final_tidyframe, "final_tidyframe.txt", row.names = FALSE, col.names = TRUE, sep = ",")
 
 ## to read file:
-## my_final_tidyframe <- read.table("final_tidyframe.csv", header = TRUE, sep = ",")
+## my_final_tidyframe <- read.table("final_tidyframe.txt", header = TRUE, sep = ",")

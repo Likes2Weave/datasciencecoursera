@@ -9,6 +9,7 @@ Coleen Smith
 -   [Description of the variables in the tiny\_data.txt file](#description-of-the-variables-in-the-tiny_data.txt-file)
     -   [Fixed Variables](#fixed-variables)
     -   [Measured Variables](#measured-variables)
+-   [An Alternative Codebook - dataMaid](#an-alternative-codebook---datamaid)
 -   [Reources](#reources)
 
 Project Description
@@ -43,7 +44,7 @@ By this standard, subject and activityName would be fixed variables and should a
 For a detailed description of the steps to complete the assignment, please review the assignment [Readme](https://github.com/Likes2Weave/datasciencecoursera/blob/master/Course3/Readme.md).
 
 ``` r
-    final_tidyframe <- read.table("final_tidyframe.csv", header = TRUE, sep = ",")
+    final_tidyframe <- read.table("final_tidyframe.txt", header = TRUE, sep = ",")
 ```
 
 Each observation in final\_tidyframe includes
@@ -312,6 +313,15 @@ The remaining variables in column 3-81 are the average extracted mean and standa
 #### 80. fBodyBodyGyroJerkMag\_std
 
 #### 81. fBodyBodyGyroJerkMag\_meanFreq
+
+An Alternative Codebook - dataMaid
+----------------------------------
+
+While researching codebooks, I found an interesting package called dataMaid. I had originally book marked it for later, but then ran across it again in one of the class discussion forums. In addition to information similar to summary(), dataMaid produces graphical outputs. I can see why it would be such a useful tool for cleaning data: detecting outliers, missing data and incorrectly enetered data.
+
+I include the dataMaid generated codebook for final\_tidyframe in the repository as a supplement and for fun. It does create an R Markdown file which could be edited, but edits would have to wait for the very end so they wouldn't get overwritten during the project iterations. More useful would be to look into the attribute options available to add to the data set itself.
+
+For more information on dataMaid see the resources below and <https://CRAN.R-project.org/package=dataMaid>
 
 Reources
 --------
