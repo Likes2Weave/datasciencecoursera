@@ -5,11 +5,11 @@ Coleen Smith
 
 -   [Assignment](#assignment)
 -   [Overview of Analysis](#overview-of-analysis)
-    -   [Part 1:](#part-1)
-    -   [Part 2:](#part-2)
-    -   [Part 3:](#part-3)
-    -   [Part 4:](#part-4)
-    -   [Part 5:](#part-5)
+    -   [Part 1 - Merge](#part-1---merge)
+    -   [Part 2 - Extract](#part-2---extract)
+    -   [Part 3 - Activity Labels](#part-3---activity-labels)
+    -   [Part 4 - Descriptive Variables](#part-4---descriptive-variables)
+    -   [Part 5 - Tidy Data](#part-5---tidy-data)
 -   [Analysis](#analysis)
     -   [UCI HAR Data Set](#uci-har-data-set)
         -   [Parent Directory Files](#parent-directory-files)
@@ -57,11 +57,17 @@ This assignment will create one R script called run\_analysis.R that does the fo
 
 The assignment must also meet the following criteria:
 
-    1. The submitted data set is tidy.  
+    1. The submitted data set is tidy.
+        - final_tidyframe.csv
     2. The Github repo contains the required scripts.  
+        - run_anaylysis.R  
     3. GitHub contains a code book that modifies and updates the available codebooks with the data to indicate all the variables and summaries calculated, along with units, and any other relevant information.  
-    4. The README that explains the analysis files is clear and understandable.  
-    5. The work submitted for this project is the work of the student who submitted it.  
+        - Codebook.Rmd (also github and pdf document)  
+        - For Fun: codebook_final_tidyframe.Rmd created by dataMaid package (also pdf document)  
+    4. The README that explains the analysis files is clear and understandable.
+        - Readme.Rmd (also github and pdf document)
+        - variable.txt/.xlsx used to experiment with reshaping data
+    5. The work submitted for this project is my work.  
 
 Overview of Analysis
 ====================
@@ -72,34 +78,34 @@ The files were downloaded and explored to review the type of data presented and 
 
 This section is just an summary. For specifics on the analysis and code, please see the appropriate, labeled sections. In general, text files were read into data frames with the same name. X\_test.txt was read into X\_test data frame.
 
-Part 1:
--------
+Part 1 - Merge
+--------------
 
 I applied the Lego brick methodology, using cbind() to create the test\_merged and train\_merged data frames. The three smaller data files in the test folder (subject\_test, X\_test, Y\_test) were combined before the three larger versions in the train folder. If something went wrong, it would be easier to trace the problem with the smaller test data set. Then, the two were combined to create the test\_train data frame of 10299 rows. Although not required in this portion of the assignment, I added variable names to the data frames before cbind(). This was a useful way to visually check to make sure the columns were bound in the correct order. As recommended by Wickham, when combining observations from multiple sources, I added a fixed variable original\_file to distinguish test data from train data.
 
 Part 1 final output: tidyframe
 
-Part 2:
--------
+Part 2 - Extract
+----------------
 
 Since test\_train included column names, I could use grep to extract the columns with "mean"" and "std" in their names. I did not include those with "Mean" since they were input to angle features rather than an actual mean.
 
 Part 2 final output: mean\_std\_tidyframe
 
-Part 3:
--------
+Part 3 - Activity Labels
+------------------------
 
 My background is with relational databases, so that influences the way I think about data structures. I created an activity\_label data frame and used inner\_join() to add the activity name to the mean\_std\_tidyframe. I checked to ensure that there were no missing values before the join. Since activity number was not required later, it was omitted from final output.
 
 Part 3 final output: activity\_tidyframe
 
-Part 4:
--------
+Part 4 - Descriptive Variables
+------------------------------
 
 By the end of Part 3, activity\_tidyframe already included descriptive variable names, but there was room to improve. I removed the parentheses and replaced the dashes with underscores. I also removed the leading digits from the mean and std variable names. Not all the original variable names in features.txt were unique, so I retained the original feature number with the feature name to make sure that the variable names would be unique in Part 1. None of these were required in Part 2, so the digits could be removed from the activity\_tidyframe variable names. Part 4 final output: descriptive\_tidyframe.
 
-Part 5:
--------
+Part 5 - Tidy Data
+------------------
 
 To prepare for Part 5, I tried to make sure that the output from each part of the assignment was tidy. My core assumption was that each of the variables listed in features.txt was a discrete measurement. The question remained: was a variable like tBodyAcc\_mean\_X a single observed measurement or could it be segmented to create a more narrow and "tidy-er" data set? After playing with the various permutations, segmenting the variables was possible, but introduced NAs into the data. Introducing NAs to a data set that had recorded 561 measurements for each of six activities for every subject seemed inappropriate. Without better knowledge of the 561 variables measured, I did not feel qualified to create a data set that might highlight "missing" data.
 
@@ -113,13 +119,9 @@ Analysis
 UCI HAR Data Set
 ----------------
 
-Data collected from the accelerometers from the Samsung Galaxy S smartphone was made available to download. A full description is available at the site where the data was obtained:
+Data collected from the accelerometers from the Samsung Galaxy S smartphone was made available to download. From: Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.
 
-<http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones>
-
-Here are the data for the project:
-
-<https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip>
+[Full description](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones) [Link to data](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip)
 
 After downloading and unzipping files, I renamed the directory from "UCI HAR Dataset" to "UCI\_HAR\_Dataset" to avoid possible issues with spaces in a pathname.
 
@@ -156,18 +158,19 @@ Based on the information included in features\_info.txt, the files in the test a
 To get a sense of how the data were arranged, I also looked at each of the files using atom.
 
 test (folder)
-- inertial signals (folder)
-- each .txt - a set of 35 element vectors
-- subject\_test.txt - a single column of numbers, no column headers
-- x\_test.txt - rows of 561 element vectors, no column headers
-- y\_test.txt - a single column of numbers, no column headers
-- "1" 496 occurrences
-- "2" 471 occurrences
-- "3" 420 occurrences
-- "4" 491 occurrences
-- "5" 532 occurrences
-- "6" 537 occurrences
-- Total = 2947
+
+-   inertial signals (folder)
+    -   each .txt - a set of 35 element vectors
+-   subject\_test.txt - a single column of numbers, no column headers
+-   x\_test.txt - rows of 561 element vectors, no column headers
+-   y\_test.txt - a single column of numbers, no column headers
+    -   "1" 496 occurrences
+    -   "2" 471 occurrences
+    -   "3" 420 occurrences
+    -   "4" 491 occurrences
+    -   "5" 532 occurrences
+    -   "6" 537 occurrences
+    -   Total = 2947
 
 ### Train Folder Files
 
@@ -178,7 +181,7 @@ test (folder)
     ## [1] "Inertial Signals"  "subject_train.txt" "X_train.txt"      
     ## [4] "y_train.txt"
 
-Train (folder) mirrors the file structure and organization seen in test files, only larger because files represent 70 subjects rather than 30.
+Based on information provided by the UCI HAR Data Set [README.txt](https://github.com/Likes2Weave/datasciencecoursera/blob/master/Course3/UCI_HAR_Dataset/README.txt), the train files mirrors the structure and organization seen in test files, only larger because files represent 70 subjects rather than 30.
 
 1. Merge the training & the test sets to create one data set
 ============================================================
@@ -663,21 +666,21 @@ The data set submitted will be wide form, with each column representing a fixed 
 Not So Tidy - Do measured features represent more than one value?
 -----------------------------------------------------------------
 
-Looking at the data frame extracted in Part 4, the mean() and std() variables contain three segments: feature, calculation and reference. Furthermore, each variable starts with a "t" or "f." For example with tBodyAcc\_mean\_X, tBodyAcc would be the feature variable, mean would be the calculation and X would be the reference. Summarized:
+Looking at the data frame extracted in Part 4, the mean() and std() variables contain three segments: feature, calculation and reference. Furthermore, each variable starts with a domain "t" (time) or "f" (frequency). For example with tBodyAcc\_mean\_X, tBodyAcc would be the feature variable, mean would be the calculation and X would be the reference. Summarized:
 
--   features as measured variable (11): fBodyAcc, fBodyAccJerk, fBodyBodyAccJerk, fBodyGyro, fBodyBodyGyro, fBodyBodyGyroJerk, tBodyAcc, tBodyAccJerk, tBodyGyro, tBodyGyroJerk, tGravityAcc
+-   features as measured variables (11): fBodyAcc, fBodyAccJerk, fBodyBodyAccJerk, fBodyGyro, fBodyBodyGyro, fBodyBodyGyroJerk, tBodyAcc, tBodyAccJerk, tBodyGyro, tBodyGyroJerk, tGravityAcc
 
 -   Calculation (3): mean, meanFreq, std
 
--   Reference (4): X-axis, Y-axis, Z-Axis Mag
+-   Reference (4): X-axis, Y-axis, Z-Axis, Magnitude
 
-The data frame could be reshaped to allow feature variable grouping by subject and activity, as well as calculation and/or reference. Grouping by all four would yield summary data equivalent to the final\_tidyframe above. For a look at one possible outcome, see variable.xlsx where I played with reshaping based on segmenting the variable names.
+The data frame could be reshaped to allow feature variable grouping by subject and activity, as well as domain, calculation and/or reference.
 
-Not all possible combination of feature, calculation and reference are included in the original data. Introducing NAs creates the appearance the original researchers missed key calculations when perhaps that permutation of feature, calculation and frame was impossible, impractical or irrelevant.
+Not all possible combinations of domain, feature, calculation and reference are included in the original data. Introducing NAs creates the appearance the original researchers missed key calculations when perhaps that permutation of feature, calculation and frame was impossible, impractical or irrelevant.
 
-That would not be tidy.
+That would not be tidy. For a look at one possible outcome, see variable.xlsx where I played with reshaping based on segmenting the variable names.
 
-This is a good example of where I would spend time with the end user to truly understand the physics behind the data.
+This is a good example of where I would spend time with the end user to truly understand the physics behind the data and the type of data analysis needed. The shape must fit the task.
 
 Tidy Data - Measured features represent a single value
 ------------------------------------------------------
@@ -693,9 +696,9 @@ The most direct approach for creating a second data set with the average of each
         summarise_all(mean)
 ```
 
-With thirty subjects and six activities, final\_tidyframe should have 180 rows. The original\_file column was not required, thus not included in final\_tidyframe, resulting in 81 columns.
+With thirty subjects and six activities, final\_tidyframe should have 180 rows and 81 columns. The original\_file column was not required, thus not included in final\_tidyframe.
 
-This approach is tidy and appropriate if the data set end user considers each of the 79 measured variables a single unit of data. Grouping this way by subject and then activity creates a data set that could be used as is, or to further summarize data by additional combinations of subject or activity.
+This approach is tidy and appropriate *if the data set end user considers each of the 79 measured variables a single unit of data.* Grouping this way by subject and then activity creates a data set that could be used as is, or to further summarize data by additional combinations of subject or activity.
 
 Summary: A tidy data set
 ------------------------
@@ -714,11 +717,11 @@ Output file: final\_tidyframe.csv
 ---------------------------------
 
 ``` r
-    ## write to a csv for submission
-    write.csv(final_tidyframe, file = "final_tidyframe.csv")
+## write to a csv for submission
+write.table(final_tidyframe, "final_tidyframe.csv", row.names = FALSE, col.names = TRUE, sep = ",")
 
-    ## to read file:
-    #my_final_tidyframe <- read.csv("final_tidyframe.csv", header = TRUE, sep = ",")
+## to read file:
+## my_final_tidyframe <- read.table("final_tidyframe.csv", header = TRUE, sep = ",")
 ```
 
 Resources
@@ -745,7 +748,7 @@ Afterword: Tidy Data, Tidy Pantry
 
 As with creating descriptive variables, there is a trade off between using data as originally recorded and data as segmented. R offers powerful tools for reshaping data, but just because one can reshape the data, does not mean the reshaped version is meaningful. Reshaping data sets must be accompanied by a solid knowledge of the derivation of the data and its applications.
 
-'Tis the season for spring cleaning and emerging critters. A good time to make sure all secure and tidy in the pantry. Consider an example, an observer's top to bottom view of my pantry:
+'Tis the season for spring cleaning and emerging critters. A good time to make sure all is secure and tidy in the pantry. Consider an example, an observer's top to bottom view of my pantry:
 
 -   shelf 1: square based, plastic bins, medium
 -   shelf 2: square based, plastic bins, large, medium, small
@@ -753,14 +756,14 @@ As with creating descriptive variables, there is a trade off between using data 
 -   shelf 4: canned goods, plastic bags
 -   floor: canned goods
 
-It might be tempting to re-organize my pantry storage by storage type: bags, bins, baskets, cans, jars. It would be very tidy, but a total disaster for meal prep because it is not the container that is critical, but the contents and application.
+It might be tempting to re-organize my pantry storage by storage type: bags, bins, baskets, cans, jars. It would be very tidy and use shelf space more efficiently, but a total disaster for meal prep because it is not the container that is critical, but the contents and application.
 
 A more valid recording of my pantry:
 
--   shelf 1: sweeteners, chocolate, garnishes for desserts
+-   shelf 1: sugars, chocolate, garnishes for desserts
 -   shelf 2: flours, rising agents for baking
 -   shelf 3: nuts, seeds, cereals and dried fruits for granola & trail mix
 -   shelf 4: beans, pasta, grains for side dishes
 -   floor: dog food
 
-I definitely would not want the dog food next to the refried beans (cans), or the pumpkin seeds with the mung beans (glass jars)!
+Thinking about my pantry was a good thought experiment as I worked through thie exercise. Organization follows function. I definitely would not want the dog food too close the refried beans (cans).
